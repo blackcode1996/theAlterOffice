@@ -55,6 +55,6 @@ https://documenter.getpostman.com/view/25625593/2sA3sAiTry
 ```
 - Schema designs
 
-<img src="https://github.com/user-attachments/assets/60aab973-0a99-45a0-9f2b-d333094ac677" alt="project-image" height="500"/>
+<img src="https://github.com/user-attachments/assets/095f4513-6224-42d4-9126-5c5cb9a1a8b0" alt="project-image" height="500"/>
 
 
