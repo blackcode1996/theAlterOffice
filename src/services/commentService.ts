@@ -17,12 +17,13 @@ export const createComment = async (postId: mongoose.Types.ObjectId, text: strin
 };
 
 // Reply to Existing Comment
-export const replyToComment = async (postId: mongoose.Types.ObjectId, commentId: mongoose.Types.ObjectId, text: string, userId: mongoose.Types.ObjectId) => {
+export const replyToComment = async (postId: mongoose.Types.ObjectId, commentId: mongoose.Types.ObjectId, text: string, authorId: mongoose.Types.ObjectId) => {
+
     try {
         const newReply = new Comment({
             postId,
             text,
-            userId,
+            authorId,
             parentCommentId: commentId
         });
         await newReply.save();
@@ -45,17 +46,31 @@ export const getCommentsForPost = async (postId: mongoose.Types.ObjectId, sortBy
 };
 
 // Expand Parent-Level Comments with Pagination
-export const expandComments = async (postId: mongoose.Types.ObjectId, commentId: mongoose.Types.ObjectId, page: number, pageSize: number) => {
-   console.log({postId});
-   console.log({commentId});
-   console.log(await Comment.find({postId, commentId }));
-    try {
-        const comments = await Comment.find({ postId, commentId })
-            .skip((page - 1) * pageSize)
-            .limit(pageSize)
-            .exec();
-        return comments;
-    } catch (error: any) {
-        throw new Error(`Error expanding comments: ${error.message}`);
-    }
+export const expandComments = async (
+    postId: mongoose.Types.ObjectId,
+    commentId: mongoose.Types.ObjectId,
+    page: number,
+    pageSize: number
+) => {
+    const skip = (page - 1) * pageSize;
+
+    const comments = await Comment.find({
+        postId: postId,
+        parentCommentId: commentId,
+    })
+        .skip(skip)
+        .limit(pageSize)
+        .populate({
+            path: 'replies',
+            options: { limit: 2, sort: { createdAt: -1 } }, 
+            select: 'text createdAt', 
+        })
+        .populate('postId', '_id') 
+        .populate('parentCommentId', '_id') 
+        .populate('authorId', 'username')
+        .exec();
+
+    const totalReplies = await Comment.countDocuments({ parentCommentId: commentId });
+
+    return { comments, totalReplies };
 };

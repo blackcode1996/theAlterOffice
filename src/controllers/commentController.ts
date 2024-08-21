@@ -46,24 +46,21 @@ export const getCommentsForPost = async (req: Request, res: Response, next: Next
     }
 };
 
-export const expandComments = async (req: Request, res: Response, next: Function) => {
+
+export const expandComments = async (req: Request, res: Response, next: NextFunction) => {
     const { postId, commentId } = req.params;
-    console.log({ postId });
-    console.log({ commentId });
-    const { page, pageSize } = req.query;
+    const { page = 1, pageSize = 10 } = req.query;
+
     try {
-        const postIdobj = new mongoose.Types.ObjectId(postId);
-        const commentIdobj = new mongoose.Types.ObjectId(commentId);
+        const postObjectId = new mongoose.Types.ObjectId(postId);
+        const commentObjectId = new mongoose.Types.ObjectId(commentId);
 
-        const comments = await commentService.expandComments(
-            postIdobj,
-            commentIdobj,
-            parseInt(page as string, 10),
-            parseInt(pageSize as string, 10)
-        );
+        const { comments, totalReplies } = await commentService.expandComments(postObjectId, commentObjectId, parseInt(page as string, 10), parseInt(pageSize as string, 10));
 
-        console.log({ comments });
-        res.status(200).json({ comments });
+        res.status(200).json({
+            comments,
+            totalReplies,
+        });
     } catch (error) {
         next(error);
     }

@@ -5,6 +5,7 @@ interface IComment extends Document {
     text: string;
     authorId: mongoose.Schema.Types.ObjectId;
     parentCommentId?: mongoose.Schema.Types.ObjectId | null;
+    replies: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -15,6 +16,7 @@ const CommentSchema: Schema<IComment> = new Schema(
         text: { type: String, required: true },
         authorId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
         parentCommentId: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
+        replies: [{ type: mongoose.Types.ObjectId, ref: 'Comment' }],
     },
     { timestamps: true }
 );
